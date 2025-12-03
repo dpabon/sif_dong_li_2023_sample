@@ -1,14 +1,125 @@
 {
   "type": "Collection",
-  "id": "sif-collection",
-  "stac_version": "1.1.0",
-  "description": "Solar-Induced Fluorescence daily data covering July 2023 provided by Dong Li",
+  "id": "SIF_COLLECTION",
+  "stac_version": "0.9.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json",
+    "https://stac-extensions.github.io/eo/v1.1.0/schema.json"
+  ],
+  "title": "SIF July 2023",
+  "description": "Daily Solar-Induced Fluorescence measurements for July 2023",
+  "license": "proprietary",
+  "cube:dimensions": {
+    "x": {
+      "type": "spatial",
+      "axis": "x",
+      "extent": [
+        -180.0,
+        180.0
+      ],
+      "step": 0.1,
+      "reference_system": {
+        "$schema": "https://proj.org/schemas/v0.2/projjson.schema.json",
+        "type": "GeodeticCRS",
+        "name": "EPSG:4326",
+        "id": {
+          "authority": "EPSG",
+          "code": 4326
+        }
+      }
+    },
+    "y": {
+      "type": "spatial",
+      "axis": "y",
+      "extent": [
+        -90.0,
+        90.0
+      ],
+      "step": 0.1,
+      "reference_system": {
+        "$schema": "https://proj.org/schemas/v0.2/projjson.schema.json",
+        "type": "GeodeticCRS",
+        "name": "EPSG:4326",
+        "id": {
+          "authority": "EPSG",
+          "code": 4326
+        }
+      }
+    },
+    "t": {
+      "type": "temporal",
+      "extent": [
+        "2023-07-01T00:00:00+00:00",
+        "2023-07-31T00:00:00+00:00"
+      ]
+    },
+    "bands": {
+      "type": "bands",
+      "values": [
+        "SIF"
+      ]
+    }
+  },
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -180.0,
+          -90.0,
+          180.0,
+          90.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2023-07-01T00:00:00+00:00",
+          "2023-07-31T00:00:00+00:00"
+        ]
+      ]
+    }
+  },
+  "summaries": {
+    "eo:bands": [
+      {
+        "name": "SIF",
+        "center_wavelength": 0.74,
+        "full_width_half_max": 0.04,
+        "common_name": null,
+        "gsd": 11100.0,
+        "offset": 0,
+        "scale": 1.0,
+        "type": "float32",
+        "unit": "W/m\u00b2/sr/\u03bcm"
+      }
+    ],
+    "bands": [
+      {
+        "name": "SIF",
+        "eo:center_wavelength": 0.74,
+        "eo:common_name": null
+      }
+    ],
+    "gsd": [
+      11100.0
+    ]
+  },
   "links": [
+    {
+      "rel": "self",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/collection.json",
+      "type": "application/json"
+    },
     {
       "rel": "root",
       "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/catalog.json",
-      "type": "application/json",
-      "title": "SIF Data Catalog - July 2023"
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/catalog.json",
+      "type": "application/json"
     },
     {
       "rel": "item",
@@ -164,85 +275,6 @@
       "rel": "item",
       "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/SIF_20230731/SIF_20230731.json",
       "type": "application/geo+json"
-    },
-    {
-      "rel": "parent",
-      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/catalog.json",
-      "type": "application/json",
-      "title": "SIF Data Catalog - July 2023"
     }
-  ],
-  "stac_extensions": [
-    "https://stac-extensions.github.io/eo/v1.1.0/schema.json",
-    "https://stac-extensions.github.io/projection/v1.1.0/schema.json",
-    "https://stac-extensions.github.io/raster/v1.1.0/schema.json"
-  ],
-  "cube:dimensions": {
-    "x": {
-      "type": "spatial",
-      "axis": "x",
-      "reference_system": 4326,
-      "extent": [
-        -180.0,
-        180.0
-      ]
-    },
-    "y": {
-      "type": "spatial",
-      "axis": "y",
-      "reference_system": 4326,
-      "extent": [
-        -90.0,
-        90.0
-      ]
-    },
-    "t": {
-      "type": "temporal",
-      "extent": [
-        "2023-07-01T00:00:00+00:00",
-        "2023-07-31T00:00:00+00:00"
-      ]
-    },
-    "bands": {
-      "type": "bands",
-      "values": [
-        "SIF"
-      ]
-    }
-  },
-  "title": "SIF July 2023",
-  "extent": {
-    "spatial": {
-      "bbox": [
-        [
-          -180.0,
-          -90.0,
-          180.0,
-          90.0
-        ]
-      ]
-    },
-    "temporal": {
-      "interval": [
-        [
-          "2023-07-01T00:00:00Z",
-          "2023-07-31T00:00:00Z"
-        ]
-      ]
-    }
-  },
-  "license": "proprietary",
-  "summaries": {
-    "eo:bands": [
-      {
-        "name": "SIF",
-        "description": "Solar-Induced Fluorescence",
-        "center_wavelength": 0.74,
-        "full_width_half_max": 0.04
-      }
-    ],
-    "proj:epsg": [
-      4326
-    ]
-  }
+  ]
 }

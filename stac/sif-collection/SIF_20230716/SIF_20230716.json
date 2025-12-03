@@ -1,10 +1,9 @@
 {
   "type": "Feature",
-  "stac_version": "1.1.0",
+  "stac_version": "0.9.0",
   "stac_extensions": [
     "https://stac-extensions.github.io/eo/v1.1.0/schema.json",
-    "https://stac-extensions.github.io/projection/v1.1.0/schema.json",
-    "https://stac-extensions.github.io/raster/v1.1.0/schema.json"
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
   ],
   "id": "SIF_20230716",
   "geometry": {
@@ -41,16 +40,19 @@
     90.0
   ],
   "properties": {
-    "description": "Solar-Induced Fluorescence (SIF) data for 2023-07-16",
+    "datetime": "2023-07-16T00:00:00+00:00",
     "eo:bands": [
       {
         "name": "SIF",
-        "description": "Solar-Induced Fluorescence",
         "center_wavelength": 0.74,
         "full_width_half_max": 0.04
       }
     ],
-    "proj:code": "EPSG:4326",
+    "proj:epsg": 4326,
+    "proj:shape": [
+      1800,
+      3600
+    ],
     "proj:transform": [
       0.1,
       0.0,
@@ -61,52 +63,41 @@
       0.0,
       0.0,
       1.0
-    ],
-    "proj:shape": [
-      1800,
-      3600
-    ],
-    "datetime": "2023-07-16T00:00:00Z"
+    ]
+  },
+  "assets": {
+    "data": {
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/data/SIF_20230716.tif",
+      "type": "image/tiff; application=geotiff",
+      "roles": [
+        "data"
+      ],
+      "title": "SIF GeoTIFF",
+      "eo:bands": [
+        0
+      ]
+    }
   },
   "links": [
     {
-      "rel": "root",
-      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/catalog.json",
-      "type": "application/json",
-      "title": "SIF Data Catalog - July 2023"
+      "rel": "self",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/SIF_20230716/SIF_20230716.json",
+      "type": "application/geo+json"
     },
     {
       "rel": "collection",
       "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/collection.json",
-      "type": "application/json",
-      "title": "SIF July 2023"
+      "type": "application/json"
     },
     {
       "rel": "parent",
       "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/collection.json",
-      "type": "application/json",
-      "title": "SIF July 2023"
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/catalog.json",
+      "type": "application/json"
     }
-  ],
-  "assets": {
-    "data": {
-      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/SIF_20230716.tif",
-      "type": "image/tiff; application=geotiff",
-      "title": "SIF GeoTIFF",
-      "raster:bands": [
-        {
-          "nodata": -9999.0,
-          "data_type": "float32",
-          "unit": "W/m\u00b2/sr/\u03bcm"
-        }
-      ],
-      "eo:bands": [
-        0
-      ],
-      "roles": [
-        "data"
-      ]
-    }
-  },
-  "collection": "sif-collection"
+  ]
 }
