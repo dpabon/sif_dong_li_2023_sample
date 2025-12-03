@@ -12,7 +12,7 @@
     },
     {
       "rel": "child",
-      "href": "./sif-collection/collection.json",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/collection.json",
       "type": "application/json",
       "title": "SIF July 2023"
     }

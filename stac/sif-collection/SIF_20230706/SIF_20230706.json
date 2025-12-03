@@ -71,19 +71,19 @@
   "links": [
     {
       "rel": "root",
-      "href": "../../catalog.json",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/catalog.json",
       "type": "application/json",
       "title": "SIF Data Catalog - July 2023"
     },
     {
       "rel": "collection",
-      "href": "../collection.json",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/collection.json",
       "type": "application/json",
       "title": "SIF July 2023"
     },
     {
       "rel": "parent",
-      "href": "../collection.json",
+      "href": "https://raw.githubusercontent.com/dpabon/sif_dong_li_2023_sample/main/stac/sif-collection/collection.json",
       "type": "application/json",
       "title": "SIF July 2023"
     }

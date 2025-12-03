@@ -160,7 +160,8 @@ def create_stac_catalog(
     collection_description: str = "Daily Solar-Induced Fluorescence measurements",
 ):
     """
-    Create a complete OpenEO-compliant STAC catalog structure.
+    Create a complete OpenEO and CDSE-compliant STAC catalog structure.
+    Uses ABSOLUTE URLs for CDSE compatibility.
 
     Args:
         data_dir: Directory containing the GeoTIFF files
@@ -225,6 +226,33 @@ def create_stac_catalog(
         "bands": {"type": "bands", "values": ["SIF"]},
     }
 
+    # CRITICAL for CDSE: Add detailed band summaries with wavelength information
+    collection.summaries = pystac.Summaries(
+        {
+            "eo:bands": [
+                {
+                    "name": "SIF",
+                    "description": "Solar-Induced Fluorescence",
+                    "center_wavelength": 0.740,  # 740 nm
+                    "full_width_half_max": 0.040,  # ~40 nm bandwidth
+                }
+            ],
+            "proj:epsg": [],  # Will be populated with actual EPSG codes
+        }
+    )
+
+    # Add EO extension at collection level with CDSE-compatible band info
+    eo_ext = EOExtension.summaries(collection, add_if_missing=True)
+    eo_ext.bands = [
+        EOBand.create(
+            name="SIF",
+            description="Solar-Induced Fluorescence",
+            common_name=None,
+            center_wavelength=0.740,
+            full_width_half_max=0.040,
+        )
+    ]
+
     # Find all SIF GeoTIFF files
     tif_files = sorted(Path(data_dir).glob("SIF_*.tif"))
 
@@ -279,33 +307,104 @@ def create_stac_catalog(
         epsg = list(epsg_codes)[0]
         collection.extra_fields["cube:dimensions"]["x"]["reference_system"] = epsg
         collection.extra_fields["cube:dimensions"]["y"]["reference_system"] = epsg
-
-    # Add summaries (OpenEO best practice)
-    collection.summaries = pystac.Summaries(
-        {
-            "eo:bands": [{"name": "SIF", "description": "Solar-Induced Fluorescence"}],
-            "proj:epsg": list(epsg_codes) if epsg_codes else None,
-        }
-    )
-
-    # Add EO extension at collection level
-    eo_ext = EOExtension.summaries(collection, add_if_missing=True)
-    eo_ext.bands = [
-        EOBand.create(
-            name="SIF", description="Solar-Induced Fluorescence", common_name=None
-        )
-    ]
+        # Update summaries with actual EPSG
+        collection.summaries.add("proj:epsg", list(epsg_codes))
+    elif epsg_codes:
+        collection.summaries.add("proj:epsg", list(epsg_codes))
 
     # Add collection to catalog
     catalog.add_child(collection)
 
-    # Normalize hrefs to use relative paths
-    catalog.normalize_hrefs(str(output_path))
+    # CRITICAL FOR CDSE: Use absolute URLs instead of relative paths
+    # CDSE cannot resolve relative paths in STAC collections
+    base_stac_url = (
+        github_repo_url.replace(
+            "https://github.com/", "https://raw.githubusercontent.com/"
+        ).rstrip("/")
+        + "/main/stac"
+    )
 
-    # Save catalog
+    # First save with relative paths
+    catalog.normalize_hrefs(str(output_path))
     catalog.save(
         catalog_type=pystac.CatalogType.SELF_CONTAINED, dest_href=str(output_path)
     )
+
+    # Now update all links to absolute URLs for CDSE
+    print("\nConverting links to absolute URLs for CDSE compatibility...")
+
+    # Update catalog links
+    catalog_file = output_path / "catalog.json"
+    if catalog_file.exists():
+        import json
+
+        with open(catalog_file) as f:
+            catalog_data = json.load(f)
+
+        # Update self link
+        for link in catalog_data.get("links", []):
+            if link["rel"] == "self":
+                link["href"] = f"{base_stac_url}/catalog.json"
+            elif link["rel"] == "child":
+                link["href"] = f"{base_stac_url}/sif-collection/collection.json"
+
+        with open(catalog_file, "w") as f:
+            json.dump(catalog_data, f, indent=2)
+
+    # Update collection links
+    collection_file = output_path / "sif-collection" / "collection.json"
+    if collection_file.exists():
+        import json
+
+        with open(collection_file) as f:
+            collection_data = json.load(f)
+
+        # Update links to absolute URLs
+        for link in collection_data.get("links", []):
+            if link["rel"] == "self":
+                link["href"] = f"{base_stac_url}/sif-collection/collection.json"
+            elif link["rel"] == "root":
+                link["href"] = f"{base_stac_url}/catalog.json"
+            elif link["rel"] == "parent":
+                link["href"] = f"{base_stac_url}/catalog.json"
+            elif link["rel"] == "item":
+                # Convert relative item path to absolute
+                # e.g., ./SIF_20230701/SIF_20230701.json -> https://.../stac/sif-collection/SIF_20230701/SIF_20230701.json
+                href = link["href"]
+                if href.startswith("./"):
+                    href = href[2:]
+                link["href"] = f"{base_stac_url}/sif-collection/{href}"
+
+        with open(collection_file, "w") as f:
+            json.dump(collection_data, f, indent=2)
+
+    # Update all item links
+    for item_dir in (output_path / "sif-collection").glob("SIF_*"):
+        if item_dir.is_dir():
+            item_file = item_dir / f"{item_dir.name}.json"
+            if item_file.exists():
+                import json
+
+                with open(item_file) as f:
+                    item_data = json.load(f)
+
+                # Update links
+                for link in item_data.get("links", []):
+                    if link["rel"] == "self":
+                        link["href"] = (
+                            f"{base_stac_url}/sif-collection/{item_dir.name}/{item_dir.name}.json"
+                        )
+                    elif link["rel"] == "collection":
+                        link["href"] = f"{base_stac_url}/sif-collection/collection.json"
+                    elif link["rel"] == "parent":
+                        link["href"] = f"{base_stac_url}/sif-collection/collection.json"
+                    elif link["rel"] == "root":
+                        link["href"] = f"{base_stac_url}/catalog.json"
+
+                with open(item_file, "w") as f:
+                    json.dump(item_data, f, indent=2)
+
+    print(f"✓ All links converted to absolute URLs")
 
     print(f"\nOpenEO-compliant STAC catalog created successfully in {output_dir}")
     print(f"Root catalog: {output_path / 'catalog.json'}")
