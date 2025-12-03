@@ -42,6 +42,14 @@
   ],
   "properties": {
     "description": "Solar-Induced Fluorescence (SIF) data for 2023-07-19",
+    "eo:bands": [
+      {
+        "name": "SIF",
+        "description": "Solar-Induced Fluorescence",
+        "center_wavelength": 0.74,
+        "full_width_half_max": 0.04
+      }
+    ],
     "proj:code": "EPSG:4326",
     "proj:transform": [
       0.1,
@@ -57,12 +65,6 @@
     "proj:shape": [
       1800,
       3600
-    ],
-    "eo:bands": [
-      {
-        "name": "SIF",
-        "description": "Solar-Induced Fluorescence"
-      }
     ],
     "datetime": "2023-07-19T00:00:00Z"
   },
@@ -97,6 +99,9 @@
           "data_type": "float32",
           "unit": "W/m\u00b2/sr/\u03bcm"
         }
+      ],
+      "eo:bands": [
+        0
       ],
       "roles": [
         "data"

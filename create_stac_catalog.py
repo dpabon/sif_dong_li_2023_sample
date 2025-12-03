@@ -53,7 +53,7 @@ def create_stac_item(
     file_path: str, github_raw_url: str, collection_id: str = "sif-collection"
 ) -> pystac.Item:
     """
-    Create an OpenEO-compliant STAC Item for a single SIF GeoTIFF file.
+    Create an OpenEO and CDSE-compliant STAC Item for a single SIF GeoTIFF file.
 
     Args:
         file_path: Path to the GeoTIFF file
@@ -69,7 +69,7 @@ def create_stac_item(
     # Get raster metadata
     metadata = get_raster_metadata(file_path)
 
-    # Create STAC Item
+    # Create STAC Item with required extensions
     item = pystac.Item(
         id=item_id,
         geometry=metadata["geometry"],
@@ -85,6 +85,18 @@ def create_stac_item(
         ],
     )
 
+    # Add EO extension with CDSE-compatible band information (with wavelengths)
+    eo_ext = EOExtension.ext(item, add_if_missing=True)
+    eo_ext.bands = [
+        EOBand.create(
+            name="SIF",
+            description="Solar-Induced Fluorescence",
+            common_name=None,  # SIF is not a standard common name
+            center_wavelength=0.740,  # 740 nm (typical SIF observation wavelength)
+            full_width_half_max=0.040,  # ~40 nm bandwidth (approximate)
+        )
+    ]
+
     # Add the GeoTIFF asset
     asset_url = f"{github_raw_url}/{filename}"
     asset = pystac.Asset(
@@ -98,21 +110,12 @@ def create_stac_item(
     # Add projection extension
     proj_ext = ProjectionExtension.ext(item, add_if_missing=True)
     if metadata["crs"]:
-        proj_ext.epsg = (
-            int(metadata["crs"].split(":")[1]) if ":" in metadata["crs"] else None
-        )
+        crs_string = metadata["crs"]
+        # Extract EPSG code if present
+        if ":" in crs_string and crs_string.split(":")[0].upper() == "EPSG":
+            proj_ext.epsg = int(crs_string.split(":")[1])
         proj_ext.transform = metadata["transform"]
         proj_ext.shape = metadata["shape"]
-
-    # Add EO extension with band information (OpenEO requirement)
-    eo_ext = EOExtension.ext(item, add_if_missing=True)
-    eo_ext.bands = [
-        EOBand.create(
-            name="SIF",
-            description="Solar-Induced Fluorescence",
-            common_name=None,  # SIF is not a standard common name
-        )
-    ]
 
     # Add raster extension with detailed band metadata
     raster_ext = RasterExtension.ext(asset, add_if_missing=True)
@@ -139,6 +142,10 @@ def create_stac_item(
             spatial_resolution=None,  # Will be calculated from transform if needed
         )
     ]
+
+    # CRITICAL for CDSE: Add eo:bands reference to asset
+    # This tells CDSE which band in the file corresponds to which band definition
+    asset.extra_fields["eo:bands"] = [0]  # Reference to the first (and only) band
 
     return item
 
